@@ -1,12 +1,16 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-  const token = req.header("Authorization");
+  const authHeader = req.header("Authorization");
 
-  if (!token) return res.status(403).json({ mensaje: "Token no proporcionado" });
+  if (!authHeader) {
+    return res.status(403).json({ mensaje: "Token no proporcionado" });
+  }
+
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
 
   try {
-    const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.usuario = decoded;
     next();
   } catch (error) {
@@ -14,6 +18,7 @@ module.exports = (req, res, next) => {
     return res.status(403).json({ mensaje: "Token inválido" });
   }
 };
+
 
 // Este middleware se utiliza para proteger las rutas que requieren autenticación.
 // Se extrae el token del encabezado de autorización y se verifica su validez.
