@@ -1,0 +1,124 @@
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import MenuLateral from "../components/MenuLateral";
+import { AuthContext } from "../context/AuthContext";
+
+export default function Usuarios() {
+  const { usuario, token } = useContext(AuthContext);
+  const [usuarios, setUsuarios] = useState([]);
+  const [form, setForm] = useState({
+    nombre: "",
+    email: "",
+    contraseña: "",
+    rol: "almacenista",
+    almacen: "",
+  });
+  const [editId, setEditId] = useState(null);
+
+  const obtenerUsuarios = async () => {
+    try {
+      const res = await axios.get("http://localhost:5050/api/users", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsuarios(res.data);
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      alert("Error al obtener usuarios");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editId) {
+        await axios.put(`http://localhost:5050/api/users/${editId}`, form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post("http://localhost:5050/api/users/register", form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      setForm({ nombre: "", email: "", contraseña: "", rol: "almacenista", almacen: "" });
+      setEditId(null);
+      obtenerUsuarios();
+    } catch (error) {
+      console.error("Error al guardar usuario:", error);
+      alert("Error al guardar usuario");
+    }
+  };
+
+  const handleEdit = (usuario) => {
+    setForm({ ...usuario, contraseña: "" });
+    setEditId(usuario._id);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      if (confirm("¿Eliminar este usuario?")) {
+        await axios.delete(`http://localhost:5050/api/users/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        obtenerUsuarios();
+      }
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      alert("Error al eliminar usuario");
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      obtenerUsuarios();
+    }
+  }, [token]);
+
+  if (!token || usuario?.rol !== "admin") return null; // 🔐 evita mostrar si no hay permiso
+
+  return (
+    <div style={{ display: "flex" }}>
+      <MenuLateral />
+      <div style={{ padding: "2rem", marginLeft: "220px", width: "100%" }}>
+        <h2>Gestión de Usuarios</h2>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
+          <input placeholder="Nombre" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+          <input placeholder="Correo" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input type="password" placeholder="Contraseña" value={form.contraseña} onChange={(e) => setForm({ ...form, contraseña: e.target.value })} />
+          <select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}>
+            <option value="almacenista">Almacenista</option>
+            <option value="admin">Administrador</option>
+          </select>
+          <input placeholder="Almacén" value={form.almacen} onChange={(e) => setForm({ ...form, almacen: e.target.value })} />
+          <button type="submit">{editId ? "Actualizar" : "Crear"}</button>
+        </form>
+
+        <table border="1" cellPadding="10" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Almacén</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u._id}>
+                <td>{u.nombre}</td>
+                <td>{u.email}</td>
+                <td>{u.rol}</td>
+                <td>{u.almacen}</td>
+                <td>
+                  <button onClick={() => handleEdit(u)}>Editar</button>
+                  <button onClick={() => handleDelete(u._id)}>Eliminar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

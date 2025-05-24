@@ -1,0 +1,41 @@
+:root {
+  --color-primario: #003366;
+  --color-secundario: #a2c4c9;
+  --color-texto: #333;
+  --color-verde: #c4f0c5;
+  --color-amarillo: #fff8c4;
+  --color-rojo: #f8d7da;
+  --borde: 4px;
+  --espaciado: 1rem;
+  --fuente: 'Segoe UI', sans-serif;
+  
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  background-color: #f5f5f5;
+  color: var(--color-texto);
+}
+
+h1, h2, h3 {
+  margin-bottom: 0.5rem;
+}
+
+button {
+  background-color: var(--color-primario);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--borde);
+  cursor: pointer;
+}
+
+input, select {
+  padding: 0.5rem;
+  border-radius: var(--borde);
+  border: 1px solid #ccc;
+  margin: 0.3rem;
+}
+
+
