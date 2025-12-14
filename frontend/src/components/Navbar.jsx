@@ -9,10 +9,10 @@ export default function Navbar() {
   useEffect(() => {
     const obtenerFoto = async () => {
       try {
-        const res = await axios.get("http://localhost:5050/api/users/perfil", {
+        const res = await axios.get("/api/users/perfil", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setFotoPerfil(`http://localhost:5050${res.data.foto}`);
+        setFotoPerfil(`${res.data.foto}`);
       } catch (error) {
         console.error("Error al obtener la foto de perfil:", error);
       }

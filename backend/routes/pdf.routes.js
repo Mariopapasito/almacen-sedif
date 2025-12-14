@@ -3,7 +3,8 @@ const router = express.Router();
 const {
   crearVale,
   obtenerVales,
-  generarPDF
+  generarPDF,
+  eliminarVale
 } = require("../controllers/pdf.controller");
 const auth = require("../middleware/auth.middleware");
 
@@ -15,5 +16,8 @@ router.get("/", auth, obtenerVales);
 
 // 🟢 Crear un vale (requiere autenticación)
 router.post("/", auth, crearVale);
+
+// 🗑️ Eliminar un vale
+router.delete("/:id", auth, eliminarVale);
 
 module.exports = router;

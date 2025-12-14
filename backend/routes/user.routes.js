@@ -3,7 +3,7 @@ const router = express.Router();
 const { login, register } = require("../controllers/user.controller");
 const auth = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload.middleware");
-const User = require("../models/user");
+const User = require("../models/User");
 
 // 🟢 Rutas públicas
 router.post("/login", login);
@@ -12,7 +12,10 @@ router.post("/register", register);
 // 🔐 Obtener perfil del usuario autenticado
 router.get("/perfil", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.usuario.id).select("-contraseña");
+    const user = await User.findByPk(req.usuario.id, {
+      attributes: { exclude: ['contraseña'] },
+      include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+    });
     if (!user) return res.status(404).json({ mensaje: "Usuario no encontrado" });
     res.json(user);
   } catch (error) {
@@ -28,7 +31,7 @@ router.put("/upload-profile", auth, upload.single("foto"), async (req, res) => {
       return res.status(400).json({ mensaje: "No se recibió ninguna imagen" });
     }
 
-    const user = await User.findById(req.usuario.id);
+    const user = await User.findByPk(req.usuario.id);
     if (!user) return res.status(404).json({ mensaje: "Usuario no encontrado" });
 
     user.foto = `/uploads/${req.file.filename}`;
@@ -44,7 +47,10 @@ router.put("/upload-profile", auth, upload.single("foto"), async (req, res) => {
 // 🔐 Obtener todos los usuarios
 router.get("/", auth, async (req, res) => {
   try {
-    const usuarios = await User.find().select("-contraseña");
+    const usuarios = await User.findAll({
+      attributes: { exclude: ['contraseña'] },
+      include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+    });
     res.json(usuarios);
   } catch (error) {
     console.error("❌ Error al obtener usuarios:", error);
@@ -61,15 +67,17 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(400).json({ mensaje: "Nombre y correo son obligatorios" });
     }
 
-    const usuario = await User.findByIdAndUpdate(
-      req.params.id,
+    const [updated] = await User.update(
       { nombre, email, rol, almacen },
-      { new: true }
+      { where: { id: req.params.id } }
     );
 
-    if (!usuario) return res.status(404).json({ mensaje: "Usuario no encontrado" });
-
-    res.json(usuario);
+    if (updated) {
+      const usuario = await User.findByPk(req.params.id);
+      res.json(usuario);
+    } else {
+      res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
   } catch (error) {
     console.error("❌ Error al actualizar usuario:", error);
     res.status(500).json({ mensaje: "Error al actualizar usuario" });
@@ -79,10 +87,12 @@ router.put("/:id", auth, async (req, res) => {
 // 🔐 Eliminar usuario
 router.delete("/:id", auth, async (req, res) => {
   try {
-    const usuario = await User.findByIdAndDelete(req.params.id);
-    if (!usuario) return res.status(404).json({ mensaje: "Usuario no encontrado" });
-
-    res.json({ mensaje: "Usuario eliminado correctamente" });
+    const deleted = await User.destroy({ where: { id: req.params.id } });
+    if (deleted) {
+      res.json({ mensaje: "Usuario eliminado correctamente" });
+    } else {
+      res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
   } catch (error) {
     console.error("❌ Error al eliminar usuario:", error);
     res.status(500).json({ mensaje: "Error al eliminar usuario" });

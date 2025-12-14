@@ -1,17 +1,61 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
+const Almacen = require('./Almacen');
 
-const itemSchema = new mongoose.Schema(
-  {
-    nombre: { type: String, required: true },
-    tipo: { type: String, required: true },
-    categoria: { type: String, required: true },
-    cantidad: { type: Number, required: true },
-    peso: { type: Number, required: false },
-    almacen: { type: String, required: true }, // A, B, C, D, etc.
+const Item = sequelize.define('Item', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  {
-    timestamps: true, // ✅ Habilita createdAt y updatedAt
-  }
-);
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  tipo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  categoria: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  codigoBarras: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: false,
+  },
+  cantidad: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  peso: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  almacenId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,  // Cambiar a true para permitir null
+    references: {
+      model: Almacen,
+      key: 'id'
+    }
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model("Item", itemSchema);
+Item.belongsTo(Almacen, { foreignKey: 'almacenId', as: 'almacen' });
+Almacen.hasMany(Item, { foreignKey: 'almacenId' });
+
+// Hook para eliminar almacén si queda vacío
+Item.addHook('afterDestroy', async (item, options) => {
+  if (item.almacenId) {
+    const itemCount = await Item.count({ where: { almacenId: item.almacenId } });
+    if (itemCount === 0) {
+      await Almacen.destroy({ where: { id: item.almacenId } });
+    }
+  }
+});
+
+module.exports = Item;

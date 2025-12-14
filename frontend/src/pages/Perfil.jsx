@@ -17,7 +17,7 @@ export default function Perfil() {
 
     const obtenerFoto = async () => {
       try {
-        const res = await axios.get("http://localhost:5050/api/users/perfil", {
+        const res = await axios.get("/api/users/perfil", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -38,7 +38,7 @@ export default function Perfil() {
 
     try {
       const res = await axios.put(
-        "http://localhost:5050/api/users/upload-profile",
+        "/api/users/upload-profile",
         formData,
         {
           headers: {
@@ -59,11 +59,11 @@ export default function Perfil() {
   return (
     <div style={{ display: "flex" }}>
       <MenuLateral />
-      <div style={{ padding: "2rem", marginLeft: "220px", width: "100%" }}>
+      <div style={{ padding: "2rem", marginLeft: "240px", width: "100%" }}>
         <h2>Mi Perfil</h2>
         <p><strong>Nombre:</strong> {usuario?.nombre}</p>
         <p><strong>Rol:</strong> {usuario?.rol}</p>
-        <p><strong>Almacén:</strong> {usuario?.almacen}</p>
+        <p><strong>Almacén:</strong> {usuario?.almacen?.nombre || 'N/A'}</p>
 
         <div style={{ marginTop: "1rem" }}>
           <label htmlFor="fotoPerfil"><strong>Actualizar foto de perfil:</strong></label>
@@ -71,7 +71,7 @@ export default function Perfil() {
           {fotoURL && (
             <div style={{ marginTop: "1rem" }}>
               <img
-                src={`http://localhost:5050${fotoURL}`}
+                src={`${fotoURL}`}
                 alt="Foto de perfil"
                 style={{
                   height: "120px",

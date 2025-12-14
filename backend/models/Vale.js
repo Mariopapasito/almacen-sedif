@@ -1,42 +1,51 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
+const Almacen = require('./Almacen');
+const User = require('./User');
 
-const valeSchema = new mongoose.Schema(
-  {
-    producto: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 100,
-    },
-    cantidad: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    entregadoPor: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-    },
-    recibidoPor: {
-      type: String,
-      trim: true,
-    },
-    fecha: {
-      type: Date,
-      default: Date.now,
-    },
-    almacen: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+const Vale = sequelize.define('Vale', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  {
-    timestamps: true, // agrega createdAt y updatedAt
-  }
-);
+  items: {
+    // Array de objetos { nombre, cantidad, codigoBarras? }
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+  entregadoPorId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  recibidoPor: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  fecha: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+  almacenId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: Almacen,
+      key: 'id'
+    }
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model("Vale", valeSchema);
+Vale.belongsTo(Almacen, { foreignKey: 'almacenId', as: 'almacen', onDelete: 'SET NULL' });
+Almacen.hasMany(Vale, { foreignKey: 'almacenId', onDelete: 'SET NULL' });
+
+Vale.belongsTo(User, { foreignKey: 'entregadoPorId', as: 'entregadoPor' });
+User.hasMany(Vale, { foreignKey: 'entregadoPorId' });
+
+module.exports = Vale;

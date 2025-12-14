@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import DashboardAlmacenista from "./pages/DashboardAlmacenista";
 import Articulos from "./pages/Articulos";
+import Almacenes from "./pages/Almacenes";
 import Usuarios from "./pages/Usuarios";
 import Vales from "./pages/Vales";
 import Configuracion from "./pages/Configuracion";
@@ -18,6 +19,7 @@ function App() {
       <Route element={<RutaProtegida rolRequerido="admin" />}>
         <Route path="/dashboard" element={<DashboardAdmin />} />
         <Route path="/articulos" element={<Articulos />} />
+        <Route path="/almacenes" element={<Almacenes />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/configuracion" element={<Configuracion />} />
       </Route>

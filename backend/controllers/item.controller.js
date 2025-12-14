@@ -1,9 +1,10 @@
 const Item = require("../models/Item");
+const { Op, Sequelize } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 exports.crearItem = async (req, res) => {
   try {
-    const nuevo = new Item(req.body);
-    await nuevo.save();
+    const nuevo = await Item.create(req.body);
     res.status(201).json({ mensaje: "Artículo creado" });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al crear artículo", error });
@@ -12,12 +13,14 @@ exports.crearItem = async (req, res) => {
 
 exports.obtenerItems = async (req, res) => {
   try {
-    let items;
-    if (req.usuario.rol === "admin") {
-      items = await Item.find();
-    } else {
-      items = await Item.find({ almacen: req.usuario.almacen });
+    let where = {};
+    if (req.usuario.rol === "almacenista") {
+      where.almacenId = req.usuario.almacenId;
     }
+    const items = await Item.findAll({
+      where,
+      include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+    });
     res.json(items);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener artículos", error });
@@ -27,13 +30,11 @@ exports.obtenerItems = async (req, res) => {
 // ✅ NUEVA FUNCIÓN: Obtener artículos por almacén
 exports.obtenerItemsPorAlmacen = async (req, res) => {
   try {
-    const codigo = req.params.codigo;
-
-    if (!codigo) {
-      return res.status(400).json({ mensaje: "Código de almacén requerido" });
-    }
-
-    const items = await Item.find({ almacen: codigo });
+    const { id } = req.params;
+    const items = await Item.findAll({
+      where: { almacenId: id },
+      include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+    });
     res.json(items);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener artículos del almacén", error });
@@ -42,8 +43,15 @@ exports.obtenerItemsPorAlmacen = async (req, res) => {
 
 exports.actualizarItem = async (req, res) => {
   try {
-    const item = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json({ mensaje: "Artículo actualizado", item });
+    const [updated] = await Item.update(req.body, { where: { id: req.params.id } });
+    if (updated) {
+      const item = await Item.findByPk(req.params.id, {
+        include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+      });
+      res.json({ mensaje: "Artículo actualizado", item });
+    } else {
+      res.status(404).json({ mensaje: "Artículo no encontrado" });
+    }
   } catch (error) {
     res.status(500).json({ mensaje: "Error al actualizar artículo", error });
   }
@@ -51,9 +59,39 @@ exports.actualizarItem = async (req, res) => {
 
 exports.eliminarItem = async (req, res) => {
   try {
-    await Item.findByIdAndDelete(req.params.id);
-    res.json({ mensaje: "Artículo eliminado" });
+    const deleted = await Item.destroy({ where: { id: req.params.id } });
+    if (deleted) {
+      res.json({ mensaje: "Artículo eliminado" });
+    } else {
+      res.status(404).json({ mensaje: "Artículo no encontrado" });
+    }
   } catch (error) {
     res.status(500).json({ mensaje: "Error al eliminar artículo", error });
+  }
+};
+
+// Nueva función: Buscar artículos
+exports.buscarItems = async (req, res) => {
+  try {
+    const { query } = req.query;
+    let where = {};
+    if (req.usuario.rol === "almacenista") {
+      where.almacenId = req.usuario.almacenId;
+    }
+    if (query) {
+      const lowerQuery = query.toLowerCase();
+      where[Op.or] = [
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('nombre')), { [Op.like]: `%${lowerQuery}%` }),
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('tipo')), { [Op.like]: `%${lowerQuery}%` }),
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('categoria')), { [Op.like]: `%${lowerQuery}%` })
+      ];
+    }
+    const items = await Item.findAll({
+      where,
+      include: [{ model: require('../models/Almacen'), as: 'almacen' }]
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al buscar artículos", error });
   }
 };

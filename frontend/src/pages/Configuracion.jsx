@@ -44,7 +44,7 @@ export default function Configuracion() {
   return (
     <div style={{ display: "flex" }}>
       <MenuLateral />
-      <div style={{ padding: "2rem", marginLeft: "220px", width: "100%" }}>
+      <div style={{ padding: "2rem", marginLeft: "240px", width: "100%" }}>
         <h2>Configuración del Sistema</h2>
 
         <div>

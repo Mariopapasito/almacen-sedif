@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useRef } from "react";
+import { createContext, useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
@@ -6,7 +6,14 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(() => {
     const guardado = localStorage.getItem("usuario");
-    return guardado ? JSON.parse(guardado) : null;
+    if (!guardado) return null;
+    try {
+      return JSON.parse(guardado);
+    } catch (err) {
+      console.warn("Usuario en localStorage inválido, limpiando", err);
+      localStorage.removeItem("usuario");
+      return null;
+    }
   });
 
   const [token, setToken] = useState(() => localStorage.getItem("token"));
@@ -14,22 +21,22 @@ export const AuthProvider = ({ children }) => {
 
   const TIEMPO_INACTIVIDAD = 5 * 60 * 1000; // ⏱️ 5 minutos
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUsuario(null);
     setToken(null);
     localStorage.removeItem("usuario");
     localStorage.removeItem("token");
     axios.defaults.headers.common["Authorization"] = "";
     window.location.href = "/"; // ✅ Redirección segura fuera del router context
-  };
+  }, []);
 
-  const resetInactividad = () => {
+  const resetInactividad = useCallback(() => {
     clearTimeout(inactividadRef.current);
     inactividadRef.current = setTimeout(() => {
       logout();
       alert("Sesión cerrada por inactividad.");
     }, TIEMPO_INACTIVIDAD);
-  };
+  }, [logout, TIEMPO_INACTIVIDAD]);
 
   useEffect(() => {
     if (token) {
@@ -47,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener("mousemove", resetInactividad);
       window.removeEventListener("keydown", resetInactividad);
     };
-  }, [token, usuario]);
+  }, [token, usuario, resetInactividad]);
 
   const login = (datos, token) => {
     setUsuario(datos);

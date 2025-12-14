@@ -7,7 +7,8 @@ export default function MenuLateral() {
   const location = useLocation();
   const { usuario, logout } = useContext(AuthContext);
   const rol = usuario?.rol;
-  const fotoURL = usuario?.foto ? `http://localhost:5050${usuario.foto}` : null;
+  const fotoURL = usuario?.foto ? `${usuario.foto}` : null;
+  const logo = localStorage.getItem("logo") || "/logo-sedif.png";
 
   useEffect(() => {
     // Redirección forzada si ya estás en la ruta actual
@@ -19,22 +20,25 @@ export default function MenuLateral() {
 
   return (
     <div style={{
-      width: "150px",
+      width: "220px",
       backgroundColor: "#843434",
       color: "white",
       height: "100vh",
       display: "flex",
       flexDirection: "column",
-      padding: "1rem",
-      position: "fixed"
+      padding: "1.5rem",
+      position: "fixed",
+      boxShadow: "4px 0 15px rgba(0,0,0,0.1)",
+      borderRadius: "0 20px 20px 0",
+      zIndex: 1000,
     }}>
-     <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-  <img
-    src="/logo-sedif.png"
-    alt="Logo SEDIF"
-    style={{ width: "120px", height: "auto" }}
-  />
-</div>
+      <div style={{ marginBottom: "3rem", textAlign: "center" }}>
+        <img
+          src={logo}
+          alt="Logo SEDIF"
+          style={{ width: "140px", height: "auto", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.2)" }}
+        />
+      </div>
 
 
       {/* ✅ Botón de Inicio según rol */}
@@ -43,19 +47,124 @@ export default function MenuLateral() {
           if (rol === "admin") navigate("/dashboard");
           else if (rol === "almacenista") navigate("/dashboard-almacenista");
         }}
-        style={btnEstilo}
+        style={{
+          backgroundColor: "rgba(255,255,255,0.2)",
+          color: "white",
+          border: "none",
+          padding: "12px 20px",
+          marginBottom: "10px",
+          borderRadius: "10px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "500",
+          transition: "all 0.3s ease",
+          textAlign: "left",
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+        onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
       >
         🏠 Inicio
       </button>
 
-      <button onClick={() => navigate("/vales")} style={btnEstilo}>📄 Vales</button>
-      <button onClick={() => navigate("/perfil")} style={btnEstilo}>👤 Mi Perfil</button>
+      <button onClick={() => navigate("/vales")} style={{
+        backgroundColor: "rgba(255,255,255,0.2)",
+        color: "white",
+        border: "none",
+        padding: "12px 20px",
+        marginBottom: "10px",
+        borderRadius: "10px",
+        cursor: "pointer",
+        fontSize: "16px",
+        fontWeight: "500",
+        transition: "all 0.3s ease",
+        textAlign: "left",
+      }}
+        onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+        onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+      >📄 Vales</button>
+      <button onClick={() => navigate("/perfil")} style={{
+        backgroundColor: "rgba(255,255,255,0.2)",
+        color: "white",
+        border: "none",
+        padding: "12px 20px",
+        marginBottom: "10px",
+        borderRadius: "10px",
+        cursor: "pointer",
+        fontSize: "16px",
+        fontWeight: "500",
+        transition: "all 0.3s ease",
+        textAlign: "left",
+      }}
+        onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+        onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+      >👤 Mi Perfil</button>
 
       {rol === "admin" && (
         <>
-          <button onClick={() => navigate("/articulos")} style={btnEstilo}>📦 Artículos</button>
-          <button onClick={() => navigate("/usuarios")} style={btnEstilo}>👥 Usuarios</button>
-          <button onClick={() => navigate("/configuracion")} style={btnEstilo}>⚙️ Configuración</button>
+          <button onClick={() => navigate("/articulos")} style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            marginBottom: "10px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "500",
+            transition: "all 0.3s ease",
+            textAlign: "left",
+          }}
+            onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+          >📦 Artículos</button>
+          <button onClick={() => navigate("/almacenes")} style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            marginBottom: "10px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "500",
+            transition: "all 0.3s ease",
+            textAlign: "left",
+          }}
+            onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+          >🏭 Almacenes</button>
+          <button onClick={() => navigate("/usuarios")} style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            marginBottom: "10px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "500",
+            transition: "all 0.3s ease",
+            textAlign: "left",
+          }}
+            onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+          >👥 Usuarios</button>
+          <button onClick={() => navigate("/configuracion")} style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            marginBottom: "10px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "500",
+            transition: "all 0.3s ease",
+            textAlign: "left",
+          }}
+            onMouseOver={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.3)"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "rgba(255,255,255,0.2)"}
+          >⚙️ Configuración</button>
         </>
       )}
 
@@ -78,47 +187,35 @@ export default function MenuLateral() {
       )}
 
       <button
-  onClick={logout}
-  style={{
-    ...btnEstilo,
-    backgroundColor: "#fff",
-    color: "#843434",
-    fontWeight: "bold",
-    borderRadius: "30px", // más redondo
-    border: "2px solid #843434",
-    marginBottom: "1rem",
-    transition: "background-color 0.3s, transform 0.2s",
-  }}
-  onMouseOver={(e) => {
-    e.target.style.backgroundColor = "#eaeaea"; // más oscuro al pasar cursor
-    e.target.style.transform = "scale(1.02)";
-  }}
-  onFocus={(e) => {
-    e.target.style.backgroundColor = "#eaeaea";
-    e.target.style.transform = "scale(1.02)";
-  }}
-  onMouseOut={(e) => {
-    e.target.style.backgroundColor = "#fff";
-    e.target.style.transform = "scale(1)";
-  }}
-  onBlur={(e) => {
-    e.target.style.backgroundColor = "#fff";
-    e.target.style.transform = "scale(1)";
-  }}
->
-  Cerrar sesión
-</button>
+        onClick={logout}
+        style={{
+          backgroundColor: "#fff",
+          color: "#843434",
+          border: "2px solid #843434",
+          padding: "12px 20px",
+          borderRadius: "25px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          marginBottom: "1rem",
+          transition: "all 0.3s ease",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        }}
+        onMouseOver={(e) => {
+          e.target.style.backgroundColor = "#f8f8f8";
+          e.target.style.transform = "translateY(-2px)";
+          e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+        }}
+        onMouseOut={(e) => {
+          e.target.style.backgroundColor = "#fff";
+          e.target.style.transform = "translateY(0)";
+          e.target.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+        }}
+      >
+        Cerrar sesión
+      </button>
     </div>
   );
 }
 
-const btnEstilo = {
-  backgroundColor: "transparent",
-  border: "none",
-  color: "white",
-  textAlign: "left",
-  padding: "0.75rem 1rem",
-  cursor: "pointer",
-  fontSize: "1rem",
-  marginBottom: "0.5rem"
-};
+
