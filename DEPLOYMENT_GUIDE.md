@@ -4,42 +4,92 @@ Esta guía te llevará paso a paso para desplegar tu aplicación SEDIF en produc
 
 ---
 
-## 📦 PASO 1: Base de Datos MySQL (Railway o Render MySQL)
+## 📦 PASO 1: Base de Datos MySQL (Aiven o FreeSQLDatabase)
 
 ### ⚠️ IMPORTANTE: PlanetScale ya NO ofrece plan gratuito desde 2024
 
-### Opción A: Railway MySQL (RECOMENDADO - $5 gratis para empezar)
+### Opción A: FreeSQLDatabase.com (RECOMENDADO - 100% Gratis, sin tarjeta)
 
-1. **Ve a https://railway.app**
-2. Click en **"Start a New Project"**
-3. Click en **"Deploy MySQL"**
-4. Railway creará automáticamente una base de datos MySQL
+1. **Ve a https://www.freesqldatabase.com**
+
+2. **Llena el formulario simple:**
+   ```
+   Database Name: almacen_sedif
+   (Deja los demás campos como están)
+   ```
+
+3. **Click en "Create Database"**
+
+4. **IMPORTANTE - Copia INMEDIATAMENTE estos datos** (aparecen solo UNA vez):
+   ```
+   Server: sql?.freesqldatabase.com
+   Port: 3306
+   Database Name: sql?????_almacen_sedif
+   Username: sql?????_almacen_sedif
+   Password: (tu password generada)
+   ```
+   **⚠️ Guarda estos datos en un lugar seguro** (los necesitarás después)
+
+5. **Conecta y crea las tablas con PHPMyAdmin:**
+   - En la página de confirmación, click en **"Go to PhpMyAdmin"**
+   - Login con el username y password que copiaste
+   - Click en tu base de datos en el panel izquierdo
+   - Click en la pestaña **"SQL"** arriba
+   - Abre el archivo `DATABASE_SETUP.sql` de tu proyecto local
+   - **Copia TODO el contenido** del archivo
+   - **Pégalo** en el editor SQL de PHPMyAdmin
+   - Click en **"Go"** o **"Ejecutar"** abajo a la derecha
+   - Verás mensajes verdes de éxito
+
+6. **Verifica las tablas:**
+   - En el panel izquierdo, refresca
+   - Deberías ver: `Users`, `Almacenes`, `Items`, `Vales`
+   - Click en `Users` → deberías ver 1 usuario: admin@sedif.com
+
+### Opción B: Aiven MySQL (También gratis con $300 crédito)
+
+1. **Ve a https://aiven.io/mysql**
+
+2. **Crea cuenta gratuita:**
+   - Click en **"Try Aiven for Free"**
+   - Registra con email o Google
+   - **NO necesitas tarjeta de crédito** (te dan $300 de crédito gratis)
+
+3. **Crea tu servicio MySQL:**
+   - Click en **"Create service"**
+   - Selecciona **"MySQL"**
+   - Plan: **"Free Plan"** o **"Hobbyist"**
+   - Cloud: **"Google Cloud"**
+   - Region: **"us-east"** (el más cercano gratis)
+   - Service name: `almacen-sedif-db`
+   - Click en **"Create service"**
+
+4. **Espera 2-3 minutos** (verás una barra de progreso)
 
 5. **Obtén las credenciales:**
-   - En el dashboard, click en tu base de datos MySQL
-   - Ve a la pestaña **"Variables"**
-   - Copia estos valores (los necesitarás después):
+   - Cuando el estado sea **"Running"** (círculo verde)
+   - Ve a **"Overview"**
+   - Scroll hasta **"Connection information"**
+   - Copia estos valores:
      ```
-     MYSQLHOST=viaduct.proxy.rlwy.net
-     MYSQLPORT=12345
-     MYSQLUSER=root
-     MYSQLPASSWORD=abc123def456...
-     MYSQLDATABASE=railway
+     Host: almacen-sedif-db-tuusuario.aivencloud.com
+     Port: 12345
+     User: avnadmin
+     Password: [Click en el ícono del ojo para ver]
+     Database: defaultdb
      ```
 
-6. **Conecta y crea las tablas:**
-   - Click en la pestaña **"Data"** de tu MySQL en Railway
-   - Click en **"Query"**
-   - Abre el archivo `DATABASE_SETUP.sql` de tu proyecto
-   - **Copia TODO el contenido** del archivo
-   - **Pégalo** en el editor de Query de Railway
-   - Click en **"Run Query"**
-   - Verás: "Query executed successfully"
-
-### Opción B: Render MySQL (Plan de pago - $7/mes)
-
-1. **Ve a https://render.com**
-2. Click en **"New +"** → **"PostgreSQL"** (Render no ofrece MySQL gratis, usa Railway)
+6. **Crea las tablas con MySQL Workbench o Terminal:**
+   
+   **Si tienes MySQL instalado localmente:**
+   ```bash
+   mysql -h TU_HOST -P TU_PORT -u avnadmin -p defaultdb < DATABASE_SETUP.sql
+   ```
+   
+   **O usa la consola web de Aiven:**
+   - En tu servicio, click en **"Query Editor"** en el menú lateral
+   - Copia el contenido de `DATABASE_SETUP.sql`
+   - Pégalo y ejecuta
 
 ---
 
@@ -74,18 +124,31 @@ Esta guía te llevará paso a paso para desplegar tu aplicación SEDIF en produc
    
    Click en **"Add Environment Variable"** para CADA una de estas:
    
+   **Si usaste FreeSQLDatabase:**
    ```
-   DB_HOST=viaduct.proxy.rlwy.net
-   DB_PORT=12345
-   DB_USER=root
-   DB_PASSWORD=tu-password-de-railway
-   DB_NAME=railway
+   DB_HOST=sql?.freesqldatabase.com
+   DB_PORT=3306
+   DB_USER=sql?????_almacen_sedif
+   DB_PASSWORD=tu-password-de-freesql
+   DB_NAME=sql?????_almacen_sedif
    JWT_SECRET=claveSuperSecreta123
    NODE_ENV=production
    PORT=5050
    ```
    
-   **Reemplaza los valores** de DB_HOST, DB_PORT, DB_PASSWORD con los que copiaste de Railway.
+   **Si usaste Aiven:**
+   ```
+   DB_HOST=almacen-sedif-db-tuusuario.aivencloud.com
+   DB_PORT=12345
+   DB_USER=avnadmin
+   DB_PASSWORD=tu-password-de-aiven
+   DB_NAME=defaultdb
+   JWT_SECRET=claveSuperSecreta123
+   NODE_ENV=production
+   PORT=5050
+   ```
+   
+   **⚠️ Reemplaza los valores** con las credenciales que copiaste de tu base de datos.
 
 7. **Click en "Create Web Service"**
 
@@ -186,10 +249,15 @@ Esta guía te llevará paso a paso para desplegar tu aplicación SEDIF en produc
 
 ### Error: "Table doesn't exist"
 
-**Problema:** No se crearon las tablas en Railway
+**Problema:** No se crearon las tablas en tu base de datos
 
-**Solución:**
-1. Ve a Railway → Tu MySQL → **"Data"** → **"Query"**
+**Solución FreeSQLDatabase:**
+1. Ve a https://www.freesqldatabase.com → PhpMyAdmin
+2. Copia TODO el contenido de `DATABASE_SETUP.sql`
+3. Pégalo en la pestaña SQL y ejecuta de nuevo
+
+**Solución Aiven:**
+1. Ve a tu servicio Aiven → Query Editor
 2. Copia TODO el contenido de `DATABASE_SETUP.sql`
 3. Pégalo y ejecuta de nuevo
 
@@ -200,12 +268,12 @@ Esta guía te llevará paso a paso para desplegar tu aplicación SEDIF en produc
 **Anota esto:**
 
 ```
-✅ Base de Datos (Railway):
+✅ Base de Datos (FreeSQLDatabase o Aiven):
    Host: _________________
    Puerto: _________________
-   Usuario: root
+   Usuario: _________________
    Password: _________________
-   Database: railway
+   Database: _________________
 
 ✅ Backend (Render):
    URL: https://_________________.onrender.com
@@ -222,11 +290,12 @@ Esta guía te llevará paso a paso para desplegar tu aplicación SEDIF en produc
 
 ## 💰 Costos
 
-- **Railway MySQL:** $5 gratis inicial, luego ~$5/mes
+- **FreeSQLDatabase:** 100% Gratis (100MB espacio, suficiente para este proyecto)
+- **Aiven MySQL:** Gratis con $300 de crédito (~6 meses gratis)
 - **Render Backend:** Gratis (con sleep después de 15 min inactividad)
 - **Netlify Frontend:** Gratis (300 min build/mes, 100GB bandwidth/mes)
 
-**Total:** Primer mes gratis, después ~$5/mes por MySQL
+**Total:** 100% GRATIS con FreeSQLDatabase, o gratis por 6 meses con Aiven
 
 ---
 
